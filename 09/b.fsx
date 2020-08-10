@@ -19,16 +19,16 @@ let out (p: Path) =
     match p with
     | Path(current, visited, distance) -> dic.[current].Where(fun (s, _) -> not <| visited.Contains(s)).Select(fun (s, d) -> Path(s, s :: visited, distance + d))
 
-let mutable min = Path("AlphaCentauri", ["AlphaCentauri"], 0)
+let mutable max = Path("AlphaCentauri", ["AlphaCentauri"], 0)
 let mutable walkers = ["Snowdin"; "Tambi";  "Faerun"; "Norrath"; "Straylight"; "Tristram"; "Arbre"].Select(fun s -> Path(s, [s], 0))
 let theEnd (Path(_, set, _)) = set.Length >= 8
 
-while not <| theEnd(min) do
-    let result = out(min).Union(walkers)
+while not <| theEnd(max) do
+    let result = out(max).Union(walkers)
     let sorted = List.rev <| (List.sortBy (fun (Path(_, _, d)) -> d) <| Seq.toList(result))
     match sorted with
-    | nmin :: nwalkers ->
-        min <- nmin
+    | nmax :: nwalkers ->
+        max <- nmax
         walkers <- nwalkers
 
-Console.WriteLine(min)
+Console.WriteLine(max)
