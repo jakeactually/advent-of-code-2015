@@ -36,14 +36,18 @@ let out (Path(s, i)) =
     let ops = List.filter (fun (k: string, v: string) -> mol.Contains(v)) pairs
     List.concat [ for (k, v) in ops do List.map (fun s2 -> Path(s2, i + 1)) (outs s v k) ]
 
-let mutable all: Path list = [Path(mol, 0)]
+let mutable min: Path = Path(mol, 0)
+let mutable all: Path list = []
 let mutable set: Set<string> = Set.empty
 
-while true do
-    printfn "%O" all.Length
+while value min <> "e" do
+    printfn "%O" min
 
-    let ws = List.filter (fun (Path(s, i)) -> not <| set.Contains(s)) <| List.collect out all
+    let ws = List.sortBy (fun (Path(s, i)) -> s.Length) <| (List.filter (fun (Path(s, i)) -> not <| set.Contains(s)) <| List.concat [all; out min])
     
     set <- Set.union set (Set.ofList <| List.map value ws)
 
-    all <- ws
+    match ws with
+    | x :: xs ->
+        min <- x
+        all <- xs
