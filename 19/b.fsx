@@ -3,14 +3,18 @@ open System.IO
 
 let lines = [ for line in File.ReadAllLines("input.txt") do line ]
 
-let pairs = [
+let mutable pairs = List.sortBy (String.length << snd) [
     for line in List.take 43 lines do
-        match line.Split(" => ", StringSplitOptions.RemoveEmptyEntries) with
+        match line.Split([|" => "|], StringSplitOptions.RemoveEmptyEntries) with
         | [|k; v|] -> (k, v)
         | _ -> ("", "")
 ]
 
-let mol = List.head <| List.skip 44 lines
+let mutable mol = List.head <| List.skip 44 lines
+
+type Path = Path of string * int
+
+let value (Path(s, i)) = s
 
 let rec intersperse xs a b n =
     match xs with
@@ -22,12 +26,24 @@ let rec intersperse xs a b n =
             y :: a :: intersperse ys a b (n - 1)
     | [] -> []
 
-let mutable set = Set.empty
+let outs (s: string) (k: string) (v: string): string list =
+    let parts = [ for x in s.Split([|k|], StringSplitOptions.None) do x ]
 
-for (k, v) in pairs do
-    let parts = [ for x in mol.Split(k, StringSplitOptions.None) do x ]
+    [ for i in 0..parts.Length - 2 do
+        String.Concat<string> <| intersperse parts k v i ]
 
-    for i in 0..parts.Length - 2 do
-        set <- set.Add (String.Concat<string> <| intersperse parts k v i)
+let out (Path(s, i)) =
+    let ops = List.filter (fun (k: string, v: string) -> mol.Contains(v)) pairs
+    List.concat [ for (k, v) in ops do List.map (fun s2 -> Path(s2, i + 1)) (outs s v k) ]
 
-printf "%d" set.Count
+let mutable all: Path list = [Path(mol, 0)]
+let mutable set: Set<string> = Set.empty
+
+while true do
+    printfn "%O" all.Length
+
+    let ws = List.filter (fun (Path(s, i)) -> not <| set.Contains(s)) <| List.collect out all
+    
+    set <- Set.union set (Set.ofList <| List.map value ws)
+
+    all <- ws
