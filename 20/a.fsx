@@ -16,7 +16,12 @@ let rec combs (ns: int list): int list list =
     | x :: xs -> List.concat [for s in sublists xs do (x :: s) :: combs s]
     | _ -> []
 
+let combsw xs = List.concat [combs xs; List.map List.singleton xs] |> Set.ofList |> Set.toList
+
 let mutable i = 2
 let mutable sum = 0
 
-combs [1;2;3] |> printfn "%A"
+while sum * 10 < 29000000 do
+    printfn "%A" i
+    sum <- 1 + List.sum [ for c in factors i 2 |> combsw do List.fold (*) 1 c ]
+    i <- i + 1
