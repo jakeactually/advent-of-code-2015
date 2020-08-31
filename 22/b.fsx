@@ -72,4 +72,4 @@ let cheapestWin part (hp, mana) (bossHp, bossDamage) =
 
     play part true 999999 0 (hp, mana, []) (bossHp, bossDamage)
 
-printfn "Part 2 - min to win: %d" (cheapestWin 2 (50, 500) (71, 10))
+printfn "Part 2 - min to win: %d" (cheapestWin 2 (50, 500) (58, 9))
